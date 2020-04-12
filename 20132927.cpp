@@ -20,6 +20,7 @@
 #include <ctime> // time 
 using namespace std;
 
+
 // user information management
 class User {
     int score;
@@ -29,9 +30,7 @@ class User {
     // 그냥 일단은 지금은 p1 p2 딱 정해서 하자. 나중에 확장하자. 
 public:
     User() {} // 밑에, 기본(디폴트) 생성자가 아닌 생성자가 존재하기 때문에, 기본생성자를 만들어야, 기본생성자가 필요한 객체를 생성할 수 있다.
-    User(int id): score(0), USER_IDENTITY(id) {
-        cout << "My Id is " << USER_IDENTITY << endl;
-    }
+    User(int id): score(0), USER_IDENTITY(id) { }
     void plusScore(int selectedCard){ 
         // 7을 선택하면 2점 증가. 
         if( selectedCard == 7 ){
@@ -55,13 +54,12 @@ class CardLocation {
     int mRow1, mCol1, mRow2, mCol2;
 public:
 // 숫자 넣어주면, 좌표로 환산해서 멤버변수에 할당하는 함수.
-void extractCoordinate(int input1, int input2){
-    mRow1 = (input1 / 10) - 1;
-    mCol1 = (input1 % 10) - 1;
-    mRow2 = (input2 / 10) - 1;
-    mCol2 = (input2 % 10) - 1;
-    cout << "This is extractFunction : " << mRow1 << " " << mCol1 << " " << mRow2 << " " << mCol2 << endl;
-}
+    void extractCoordinate(int input1, int input2){
+        mRow1 = (input1 / 10) - 1;
+        mCol1 = (input1 % 10) - 1;
+        mRow2 = (input2 / 10) - 1;
+        mCol2 = (input2 % 10) - 1;
+    }
 // 좌표 꺼내는 get함수 제공. 
     int row1() { return mRow1; }
     int col1() { return mCol1; }
@@ -80,7 +78,6 @@ class CardManager {    // 카드를 관리하는 건 1차원적으로 생각하�
     int *randomCardList; // 랜덤일 때만 할당 받아 사용. 
 public:
     CardManager() { 
-        cout << "card manager init - 이건 shuffle전에 나와야돼" << endl;
         // 고정 앞면 초기화. 
         for(int i = 0  ; i < 8 ; i++){
             staticCardList[i] = i+1;
@@ -90,13 +87,11 @@ public:
         }
     }
     ~CardManager() {
-        cout << "CardManager destructor" << endl;
         if(randomCardList != nullptr )
             delete[] randomCardList;
     }
     // 셔플 함수. // 셔플 판을 하나 가지고 있게. 
     void makeShuffleCard(){
-        cout << "make shuffle card" << endl;
         randomCardList = new int[16]; // 랜덤 카드 리스트 생성.
         for(int i = 0 ; i < 16; i++){
             randomCardList[i] = staticCardList[i];
@@ -105,7 +100,6 @@ public:
     }
     // 랜덤 카드 리스트를 섞는다. 
     void shuffle() {
-        cout << "shuffle" << endl;
         // 랜덤값 srand, rand 여기서만 사용하면 됨. 
         srand(time(NULL));
         int temp = 0;
@@ -116,11 +110,6 @@ public:
             randomCardList[a] = randomCardList[b];
             randomCardList[b] = temp;
         }
-        for(int i = 0; i< 16; i++){
-            cout << randomCardList[i] << ' ';
-        }
-        cout << endl;
-        
     }
     // 카드 앞면을 겟. 하는 함수. row,col 를 매개변수로 받고,
     // row,col를 1차원으로 '변환'해서 카드리스트 배열의 인덱스로 사용. 
@@ -154,7 +143,6 @@ public:
     BoardManager() {}
     // 게임 메니저에서 '랜덤이면' 이 함수 호출해서 랜덤 보드 사용할 거라고 보드 매니저에게 알려준다. 
     void setRandomeState() { 
-        cout << "set random state call" << endl;
         randomState = 1; 
         cardManager.makeShuffleCard();
     } 
@@ -208,6 +196,13 @@ public:
             return false;
         }
     }
+    // 입력한 값이 이미 정답인 카드인지 확인. 
+    bool isFrontSide(CardLocation location) {
+        if( gameBoard[location.row1()][location.col1()] != 'x' || gameBoard[location.row2()][location.col2()] != 'x'){
+            return true; // 앞면인 상황. 
+        }
+        return false;
+    }
 
 };
 
@@ -230,36 +225,47 @@ public:
         // isRandomBoard 0이면 고정 판으로. 
         // 1이면 랜덤판으로 앞면 구성. 디폴트는 그냥 고정판. 
         if(isRandomBoard == 1){ // 랜덤 보드.
-            cout << "isRnadomBoard == 1, so, call 'boardManager.setRandomeState();'"<< endl;
             boardManager.setRandomeState(); // 섞어주고, 랜덤 보드 사용한다고 선언.
         }
     }
     // 턴 끝날 때 이 함수 호출.
-    void plusTurnNumber() {
-        cout << "plusTurnNumber" << endl;
+    inline void plusTurnNumber() {
         turnCheckNumber++;
     }
     // 누구 턴인지 확인, 매 턴마다 0 1 0 1 ... 이 순으로 출력 됨.
-    int checkTurn() {
+    inline int checkTurn() {
         return turnCheckNumber % 2;
     }
     // 
     void gameStart() {
         // 배열 사용하면 조건문 안쓰고 턴마다 다른 유저로 출력,점수할당 가능.
         // 첫번째 턴. 이 때는 입력 안받고 바로 출력 후 시작. 
-        cout << "Game Start," << " turn number is " << turnCheckNumber << endl;
         if(turnCheckNumber == 0){
             boardManager.printBoard();
             cout << p[0].getId() << "'s turn, choose two cards: ";
         }
         else 
             cout << p[checkTurn()].getId() << "'s turn, choose two cards: ";
+    }
+
+    void takeInput(){
         int input1, input2;
-        cin >> input1 >> input2; // 문자가 입력 되면 무한루프 빠질수도! 
-        cin.ignore(1000,'\n');
-        getLocation(input1, input2);
-        cout << "input value : " << input1 << input2 << endl;
-        // 검사 후, 맞다 틀리다 출력 후 다음 턴으로! 
+        while(true){
+            cin >> input1 >> input2; // 문자가 입력 되면 무한루프 빠질수도! 
+            cin.ignore(1000,'\n');
+            if((input1 < 11 && input1 > 44 ) || (input2 < 11 && input2 > 44 ) ){
+                cout << "You're out of range." << endl;
+                cout << "choose again: ";
+                continue;
+            }
+            getLocation(input1, input2);
+            if(boardManager.isFrontSide(selectedLocation)){
+                cout << "You've chosen front-side card that have been already selected." << endl;
+                cout << "choose again: ";
+            } else {
+                break;
+            }
+        }
     }
 
 // 입력값으로부터 좌표 추출. 
@@ -281,7 +287,7 @@ public:
                 << "P2's score : " << p[1].getScore() << endl;
         } else { 
             // false -> 오답.
-            cout << p[checkTurn()].getId() << " failed to find a matcning pair" << endl;
+            cout << p[checkTurn()].getId() << " failed to find a matching pair" << endl;
             boardManager.printBoard(selectedLocation); // 원본 안바꾸고 선택된 카드만 뒤집어서 출력.
         }
         // 8개 다 맞췄으면 true 반환해서 게임 종료시키기.
@@ -295,20 +301,8 @@ public:
 // 입력한 값이 정답인지 체크하는 건 이 클래스 몫. 
 // 입력 값이 이미 존재하는 값을 건드렸는지, 범위 벗어났는지 에러처리도 이 클래스 몫.
 
-
-    
-
-    // 입력 받는 함수. - 여기서 입력값을 좌표로 분할 작업. 모듈러.
-    // 입력 받고 바로 출력. 입력 값 추출해서 출력 이미지에 적용. 뒤집기.
-
 };
 
-// 예외처리 함수. 예외 메세지 출력. 변수가 필요하면 클래스로.
-// 메세지를 넣어주면 그 메세지를 출력. 
-void printErrorMessage(string errorMessage) {
-    cout << errorMessage << endl;
-    // 리턴 값으로 뭔가 메세지를 반환??? 할수도?
-}
 
 int main() {
 // 1선택하면 랜덤 아님, 2선택하면 랜덤. 
@@ -333,6 +327,7 @@ int endOrNot = 1;
     // 입력 - 이것도 매니저가 처리. 
             gameManager.gameStart();
     // 입력 확인 - 틀리고 맞는지 처리 후 어떻게?
+            gameManager.takeInput();
              // 승리 판정. 
     // 승리 판정 후, 게임 종료 inner while 빠져 나가기. 
             if(gameManager.checkRight()){// 여기에 게임 종료됐는지 매니저 상태변수로 확인함수 호출. true false 반환.  
