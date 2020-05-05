@@ -1,3 +1,10 @@
+
+// const 포인터와 reference는 리터럴값(r-value)를 받을 수 있다. 
+// 문자열 리터럴을 받는 포인터를 const char *로 받아야 하는 것도 이러한 이유다. 
+// r-value는 지칭할 수 있도록 이름(메모리)을 가지고 있지 않기 때문에 변경이 불가하다. 값의 대입이 안된다는 것.
+// 그래서 const로 받아야 함. 
+
+
 /*
  a + bi 형태의 cout 출력 지원
  복소수 간 사칙연산 및 복소수와 실수 사이의 사칙연산 지원
@@ -53,12 +60,12 @@ public:
 
 // 얘는 왜 friend를 쓰지 않을까? -> 복사생성자를 생각해보자. 
 	// 같은 클래스 객체의 함수에서는, private에 직접 접근 가능한듯! -> 실험해보자. 
-	NComplex operator+(NComplex& operand) {
+	NComplex operator+(const NComplex& operand) {
 		return NComplex( realNum + operand.realNum , imaginNum + operand.imaginNum);
 	} // 객체 + operand객체 -> 객체.operator+(operand객체)와 같다. 즉, operator+는 NCoplex의 멤버함수인것.
 
 // 얘는 friend 필요. friend안쓰면, get함수 필요할 것. 또는 멤버변수를 public으로 하거나. 
-	friend NComplex operator+(double operand1, NComplex& operand2) {
+	friend NComplex operator+(double operand1, const NComplex& operand2) {
 		return NComplex( operand2.realNum + operand1, operand2.imaginNum);
 	} // operator+(객체1, 객체2) 와 같다. 즉, operator+는 전역함수인 것. 
 
@@ -71,10 +78,10 @@ public:
 	NComplex operator-(double operand) {
 		return NComplex(realNum - operand, imaginNum);
 	}
-	NComplex operator-(NComplex& operand) {
+	NComplex operator-(const NComplex& operand) {
 		return NComplex(realNum - operand.realNum, imaginNum - operand.imaginNum);
 	}
-	friend NComplex operator-(double operand1, NComplex operand2) {
+	friend NComplex operator-(double operand1, const NComplex& operand2) {
 		return NComplex( operand1 - operand2.realNum,  - operand2.imaginNum);
 	}
 	
@@ -82,13 +89,13 @@ public:
 	NComplex operator*(double operand) {
 		return NComplex(operand * realNum, operand * imaginNum);
 	}
-	//NComplex operator*(NComplex& operand) {
-	//	return NComplex(realNum * operand.realNum - imaginNum * operand.imaginNum, realNum*operand.imaginNum + imaginNum*operand.realNum);
+	NComplex operator*(const NComplex& operand) { // 임시 객체를 참조 또는 포인터로 받을 때는 const로 받아야 한다. cstring을 const char*로 받는 것과 같은 것. 이때에는 메모리의 static section에 할당된다. 
+		return NComplex(realNum * operand.realNum - imaginNum * operand.imaginNum, realNum*operand.imaginNum + imaginNum*operand.realNum);
+	}	
+	//friend NComplex operator*(NComplex operand1, NComplex operand2) {
+	//	return NComplex(operand1.realNum * operand2.realNum - operand1.imaginNum * operand2.imaginNum, operand1.realNum*operand2.imaginNum + operand1.imaginNum*operand2.realNum);
 	//}
-	friend NComplex operator*(NComplex operand1, NComplex operand2) {
-		return NComplex(operand1.realNum * operand2.realNum - operand1.imaginNum * operand2.imaginNum, operand1.realNum*operand2.imaginNum + operand1.imaginNum*operand2.realNum);
-	}
-	friend NComplex operator*(double operand1, NComplex operand2) {
+	friend NComplex operator*(double operand1, const NComplex& operand2) {
 		return NComplex(operand1 * operand2.realNum, operand1 * operand2.imaginNum);
 	}
 
@@ -99,7 +106,7 @@ public:
 		zeroCheck(operand);
 		return NComplex(realNum / operand, imaginNum / operand);
 	}
-	NComplex operator/(NComplex& operand) {
+	NComplex operator/(const NComplex& operand) {
 		zeroCheck(operand);
 							//expects an l-value for 1st argument : *this로는 연산자오버로딩의 this로 못받음. this는 l-value여야함.
 		NComplex dividend = *this * NComplex(operand.realNum,-operand.imaginNum); // 곱하기 오버로딩을 여기서 써먹는다.
@@ -112,13 +119,13 @@ public:
 		double divisor = pow(operand.realNum,2) + pow(operand.imaginNum,2); 
 		return NComplex(dividend.realNum/divisor, dividend.imaginNum/divisor);
 	}
-	friend NComplex operator/(double operand1, NComplex operand2) {
-		operand2.zeroCheck(operand2);
+	friend NComplex operator/(double operand1, const NComplex& operand2) {
+		operand2.zeroCheck();
 		NComplex dividend = operand1 * NComplex(operand2.realNum, -operand2.imaginNum);
 		double divisor = pow(operand2.realNum,2) + pow(operand2.imaginNum,2); 
 		return NComplex(dividend.realNum/divisor, dividend.imaginNum/divisor);
 	}
-	void zeroCheck(NComplex divisor){
+	void zeroCheck(const NComplex &divisor){
 		if(divisor.realNum || divisor.imaginNum) return; // 둘 중에 하나만 0이 아니어도 괜찮.
 		cout << "Error: divide by zero" << endl;
 		exit(1);
@@ -128,7 +135,11 @@ public:
 		cout << "Error: divide by zero" << endl;
 		exit(1);
 	}
-	
+	void zeroCheck() const {
+		if ( realNum || imaginNum ) return;
+		cout << "Error: divide by zero" << endl;
+		exit(0);
+	}
 	
 	string renderOutForm() {
 		return removeLastZero(to_string(realNum)) + " + " + removeLastZero(to_string(imaginNum)) + "i";
