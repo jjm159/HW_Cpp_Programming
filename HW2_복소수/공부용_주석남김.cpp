@@ -154,7 +154,7 @@ public:
 
 	// 얘는 friend가 필요 없다. 직접 접근을 안할테니까. NComplex의 private에 직접접근할 일이 있다면, friend로 NCopmlex클래스 안에 선언해주는 게 맞다. 
 	//friend ostream& operator<< (ostream& os, NComplex resultComplex){ 
-	//	cout << resultComplex.renderOutForm() << endl;
+	//	cout << resultComplex.renderOutForm();
 	//	return os;
 	//}//매개변수 resultComplex를 참조로 못받는 이유: 인자가 익명객체라서!
 
@@ -164,7 +164,7 @@ public:
 // NComplex의 private에 대한 직접 접근이 없으면 friend필요 없음. 
 // 여기서 renderOutForm함수가 public이라 아마 friend없어도 될것.
 ostream& operator<< (ostream& os, NComplex resultComplex){ // resultComplex를 복사방식으로 받는 이유는 익명객체가 인자이기때문. 인자가 임시객체!
-	cout << resultComplex.renderOutForm() << endl;
+	cout << resultComplex.renderOutForm();
 	return os;
 } // operator<<( cout , NComplex객체 ); -> 이렇게 호출되는 거라고 생각해~!
 

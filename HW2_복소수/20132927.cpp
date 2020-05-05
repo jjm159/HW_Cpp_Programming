@@ -90,25 +90,24 @@ public:
 		}
 		return str;
 	}
-};
 
-ostream& operator<< (ostream& os, NComplex resultComplex){ 
-	cout << resultComplex.renderOutForm() << endl;
+	friend ostream& operator<< (ostream& os, NComplex resultComplex){ 
+	cout << resultComplex.renderOutForm();
 	return os;
 }
+};
+
 
 int main(int argc, char* argv[]){
 
 	NComplex n1(5.1, 2.2), n2(2.0, 2.0) ,n3;
 	double d1 = 3.0;
 
-
 	cout << "n1+n2: " << n1 + n2 << endl;
 	cout << "n1*n2: " << n1 * n2 << endl;
 	cout << "n1-d1: " << n1 - d1 << endl;
 	cout << "d1*n2: " << d1 * n2 << endl;
    	cout << "n1/n3: " << n1 / n3 << endl;	 
-
 
 	return 0;
 }
