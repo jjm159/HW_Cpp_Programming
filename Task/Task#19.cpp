@@ -2,6 +2,10 @@
 
 using namespace std;
 
+int* allocArray(int size) {	return new int[size]; }
+void printArray(const int * arr) { cout << "Array elements are: " << *arr << ' ' << *(arr+1) << ' ' << *(arr+2) << endl; }
+void freeArray(const int * arr) { delete [] arr; }
+
 int main(int argc, char* argv[]){
 	int* arr;
 	int size;
@@ -11,9 +15,7 @@ int main(int argc, char* argv[]){
 
 	arr = allocArray (size);
 
-	for (int i=0; i<size; i++)
-
-	{
+	for (int i=0; i<size; i++){
 		cout << "Put an array element: ";
 		cin >> arr[i];
 	}
