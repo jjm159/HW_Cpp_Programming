@@ -4,6 +4,8 @@
 // r-value는 지칭할 수 있도록 이름(메모리)을 가지고 있지 않기 때문에 변경이 불가하다. 값의 대입이 안된다는 것.
 // 그래서 const로 받아야 함. 
 
+// zerocheck 에서 에러가 난 이유. operand2.zerocheck() 에서 zerocheck()가 const mark가 안되어 있으면 에러다. 매개변수 operand2가 const 레퍼런스 이기 때문이다. 
+
 
 /*
  a + bi 형태의 cout 출력 지원
@@ -120,12 +122,13 @@ public:
 		return NComplex(dividend.realNum/divisor, dividend.imaginNum/divisor);
 	}
 	friend NComplex operator/(double operand1, const NComplex& operand2) {
-		operand2.zeroCheck();
+		//operand2.zeroCheck();
+		operand2.zeroCheck(operand2);
 		NComplex dividend = operand1 * NComplex(operand2.realNum, -operand2.imaginNum);
 		double divisor = pow(operand2.realNum,2) + pow(operand2.imaginNum,2); 
 		return NComplex(dividend.realNum/divisor, dividend.imaginNum/divisor);
 	}
-	void zeroCheck(const NComplex &divisor){
+	void zeroCheck(const NComplex &divisor) const { // const를 하니까 126 line에서 에러가 안남.
 		if(divisor.realNum || divisor.imaginNum) return; // 둘 중에 하나만 0이 아니어도 괜찮.
 		cout << "Error: divide by zero" << endl;
 		exit(1);
@@ -165,7 +168,7 @@ public:
 
 	// 얘는 friend가 필요 없다. 직접 접근을 안할테니까. NComplex의 private에 직접접근할 일이 있다면, friend로 NCopmlex클래스 안에 선언해주는 게 맞다. 
 	//friend ostream& operator<< (ostream& os, NComplex resultComplex){ 
-	//	cout << resultComplex.renderOutForm();
+	//	cout << resultComplex.renderOutForm() << endl;
 	//	return os;
 	//}//매개변수 resultComplex를 참조로 못받는 이유: 인자가 익명객체라서!
 
@@ -175,7 +178,7 @@ public:
 // NComplex의 private에 대한 직접 접근이 없으면 friend필요 없음. 
 // 여기서 renderOutForm함수가 public이라 아마 friend없어도 될것.
 ostream& operator<< (ostream& os, NComplex resultComplex){ // resultComplex를 복사방식으로 받는 이유는 익명객체가 인자이기때문. 인자가 임시객체!
-	cout << resultComplex.renderOutForm();
+	cout << resultComplex.renderOutForm() << endl;
 	return os;
 } // operator<<( cout , NComplex객체 ); -> 이렇게 호출되는 거라고 생각해~!
 
